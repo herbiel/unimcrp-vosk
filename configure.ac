@@ -172,10 +172,15 @@ UNI_PLUGIN_ENABLED(demosynth)
 
 AM_CONDITIONAL([DEMOSYNTH_PLUGIN],[test "${enable_demosynth_plugin}" = "yes"])
 
+dnl Demo recognizer plugin.
+UNI_PLUGIN_ENABLED(demorecog)
+
+AM_CONDITIONAL([DEMORECOG_PLUGIN],[test "${enable_demorecog_plugin}" = "yes"])
+
 dnl Vosk recognizer plugin.
 UNI_PLUGIN_ENABLED(voskrecog)
 
-AM_CONDITIONAL([VOSKRECOG_PLUGIN],[test "${enable_voskrecog_plugin}"
+AM_CONDITIONAL([VOSKRECOG_PLUGIN],[test "${enable_voskrecog_plugin}" = "yes"])
 
 dnl Demo verifier plugin.
 UNI_PLUGIN_ENABLED(demoverifier)
