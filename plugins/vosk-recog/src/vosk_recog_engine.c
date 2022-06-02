@@ -449,7 +449,8 @@ static apt_bool_t vosk_recog_recognition_complete(vosk_recog_channel_t *recog_ch
 			mrcp_generic_header_t *generic_header = mrcp_generic_header_prepare(message);
 			if(generic_header) {
 				/* set content types */
-				apt_string_assign(&generic_header->content_type,"application/x-nlsml",message->pool);
+				apt_string_assign(&generic_header->content_type,"application/json",message->pool);
+				//apt_string_assign(&generic_header->content_type,"application/x-nlsml",message->pool);
 				mrcp_generic_header_property_add(message,GENERIC_HEADER_CONTENT_TYPE);
 			}
 		}
