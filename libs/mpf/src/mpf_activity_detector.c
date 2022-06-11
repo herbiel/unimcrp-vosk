@@ -133,7 +133,7 @@ static apr_size_t mpf_activity_detector_level_calculate(const mpf_frame_t *frame
     WebRtcVad_Free(vadInst);
     return -1;
   }
-  int16_t vad_mode = 2;
+  int16_t vad_mode = 3;
   status = WebRtcVad_set_mode(vadInst, vad_mode);
   if (status != 0) {
     WebRtcVad_Free(vadInst);
