@@ -48,10 +48,10 @@ struct mpf_activity_detector_t {
 MPF_DECLARE(mpf_activity_detector_t*) mpf_activity_detector_create(apr_pool_t *pool)
 {
 	mpf_activity_detector_t *detector = apr_palloc(pool,sizeof(mpf_activity_detector_t));
-	detector->level_threshold = 50; /* 0 .. 255 */
-	detector->speech_timeout = 500; /* 0.2 s */
-	detector->silence_timeout = 500; /* 0.2 s */
-	detector->noinput_timeout = 5000; /* 5 s */
+	detector->level_threshold = 3; /* 0 .. 255 */
+	detector->speech_timeout = 200; /* 0.2 s */
+	detector->silence_timeout = 200; /* 0.2 s */
+	detector->noinput_timeout = 10000; /* 5 s */
 	detector->duration = 0;
 	detector->state = DETECTOR_STATE_INACTIVITY;
 	return detector;
@@ -93,7 +93,7 @@ static APR_INLINE void mpf_activity_detector_state_change(mpf_activity_detector_
 {
 	detector->duration = 0;
 	detector->state = state;
-	//apt_log(MPF_LOG_MARK,APT_PRIO_INFO,"Activity Detector state changed [%d]",state);
+	apt_log(MPF_LOG_MARK,APT_PRIO_INFO,"Activity Detector state changed [%d]",state);
 }
 
 /*static apr_size_t mpf_activity_detector_level_calculate(const mpf_frame_t *frame)
@@ -133,7 +133,7 @@ static apr_size_t mpf_activity_detector_level_calculate(const mpf_frame_t *frame
     WebRtcVad_Free(vadInst);
     return -1;
   }
-  int16_t vad_mode = 1;
+  int16_t vad_mode = 2;
   status = WebRtcVad_set_mode(vadInst, vad_mode);
   if (status != 0) {
     WebRtcVad_Free(vadInst);
@@ -180,16 +180,15 @@ MPF_DECLARE(mpf_detector_event_e) mpf_activity_detector_process(mpf_activity_det
     apr_size_t level = 0;
     if((frame->type & MEDIA_FRAME_TYPE_AUDIO) == MEDIA_FRAME_TYPE_AUDIO) {     
         level = mpf_activity_detector_level_calculate(frame);
-#if 1
+#if 0
         apt_log(APT_LOG_MARK,APT_PRIO_INFO,"Activity Detector --------------------- [%"APR_SIZE_T_FMT"]",level);
 #endif
     }
 
     if(detector->state == DETECTOR_STATE_INACTIVITY) {
         if(level >= 1) {
-            apt_log(APT_LOG_MARK,APT_PRIO_INFO,"Activity Detector ----DETECTOR_STATE_ACTIVITY_TRANSITION---------------- [%"APR_SIZE_T_FMT"]",level);
+   //         apt_log(APT_LOG_MARK,APT_PRIO_INFO,"Activity Detector ----DETECTOR_STATE_ACTIVITY_TRANSITION---------------- [%"APR_SIZE_T_FMT"]",level);
             mpf_activity_detector_state_change(detector, DETECTOR_STATE_ACTIVITY_TRANSITION);
-            //识别到一句话开始
         }
         else {
             detector->duration += CODEC_FRAME_TIME_BASE;
@@ -201,7 +200,7 @@ MPF_DECLARE(mpf_detector_event_e) mpf_activity_detector_process(mpf_activity_det
     else if(detector->state == DETECTOR_STATE_ACTIVITY_TRANSITION) {
         if(level >= 1) {
             detector->duration += CODEC_FRAME_TIME_BASE;
-            apt_log(APT_LOG_MARK,APT_PRIO_INFO,"Activity Detector ----DETECTOR_STATE_ACTIVITY-------11111--------- [%"APR_SIZE_T_FMT"]",level);
+     //       apt_log(APT_LOG_MARK,APT_PRIO_INFO,"Activity Detector ----DETECTOR_STATE_ACTIVITY-------11111--------- [%"APR_SIZE_T_FMT"]",level);
             if(detector->duration >= detector->speech_timeout) {
                 det_event = MPF_DETECTOR_EVENT_ACTIVITY;
                 mpf_activity_detector_state_change(detector, DETECTOR_STATE_ACTIVITY);
@@ -213,10 +212,10 @@ MPF_DECLARE(mpf_detector_event_e) mpf_activity_detector_process(mpf_activity_det
     }
     else if(detector->state == DETECTOR_STATE_ACTIVITY) {
         if(level >= 1) {
-            //apt_log(APT_LOG_MARK,APT_PRIO_INFO,"Activity Detector ----DETECTOR_STATE_ACTIVITY--------2222-------- [%"APR_SIZE_T_FMT"]",level);
+       //     apt_log(APT_LOG_MARK,APT_PRIO_INFO,"Activity Detector ----DETECTOR_STATE_ACTIVITY--------2222-------- [%"APR_SIZE_T_FMT"]",level);
             detector->duration += CODEC_FRAME_TIME_BASE;
         } else {
-            apt_log(APT_LOG_MARK,APT_PRIO_INFO,"Activity Detector ----DETECTOR_STATE_INACTIVITY_TRANSITION---------------- [%"APR_SIZE_T_FMT"]",level);
+         //   apt_log(APT_LOG_MARK,APT_PRIO_INFO,"Activity Detector ----DETECTOR_STATE_INACTIVITY_TRANSITION---------------- [%"APR_SIZE_T_FMT"]",level);
             mpf_activity_detector_state_change(detector,DETECTOR_STATE_INACTIVITY_TRANSITION);
         }
     }
@@ -227,7 +226,7 @@ MPF_DECLARE(mpf_detector_event_e) mpf_activity_detector_process(mpf_activity_det
         else {
             detector->duration += CODEC_FRAME_TIME_BASE;
             if(detector->duration >= detector->silence_timeout) {
-                apt_log(APT_LOG_MARK,APT_PRIO_INFO,"Activity Detector ----DETECTOR_STATE_INACTIVITY---------------- [%"APR_SIZE_T_FMT"]",level);
+           //     apt_log(APT_LOG_MARK,APT_PRIO_INFO,"Activity Detector ----DETECTOR_STATE_INACTIVITY---------------- [%"APR_SIZE_T_FMT"]",level);
                 det_event = MPF_DETECTOR_EVENT_INACTIVITY;
                 mpf_activity_detector_state_change(detector,DETECTOR_STATE_INACTIVITY);
             }
