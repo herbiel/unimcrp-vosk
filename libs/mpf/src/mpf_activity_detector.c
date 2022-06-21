@@ -49,8 +49,8 @@ MPF_DECLARE(mpf_activity_detector_t*) mpf_activity_detector_create(apr_pool_t *p
 {
 	mpf_activity_detector_t *detector = apr_palloc(pool,sizeof(mpf_activity_detector_t));
 	detector->level_threshold = 3; /* 0 .. 255 */
-	detector->speech_timeout = 200; /* 0.2 s */
-	detector->silence_timeout = 200; /* 0.2 s */
+	detector->speech_timeout = 500; /* 0.2 s */
+	detector->silence_timeout = 2000; /* 0.2 s */
 	detector->noinput_timeout = 10000; /* 5 s */
 	detector->duration = 0;
 	detector->state = DETECTOR_STATE_INACTIVITY;
